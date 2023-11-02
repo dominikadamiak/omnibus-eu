@@ -1,0 +1,68 @@
+/**
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the Apache License, Version 2.0
+* that is bundled with this package in the file LICENSE.
+* It is also available through the world-wide-web at this URL:
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+*  @author    presta.studio
+*  @copyright Copyright (c) 2023 presta.studio
+*  @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License, Version 2.0
+*/
+
+.module-omnibuseufree h2{
+    padding-top:0 !important;
+}
+
+.presta-studio-omnibus-header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.presta-studio-documentation-list,
+.bootstrap ul.presta-studio-documentation-list {
+    margin-bottom:20px;
+}
+
+.presta-studio-omnibus-header-right a img{
+    margin-left:16px;
+}
+
+.presta-studio-omnibus-header-left i{
+    margin-top: -2px;
+    margin-right: 5px;
+    font-size: 20px;
+    vertical-align: middle;
+}
+.presta-studio-ads,
+.presta-studio-ads-mobile{
+    border:1px solid #000;
+}
+
+.presta-studio-ads-mobile{
+    display: none;
+}
+.presta-studio-ads{
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 450px) {
+    .presta-studio-omnibus-header-right .follow-presta-studio {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .presta-studio-ads-mobile{
+        display: inline-block;
+        max-width: 100%;
+        height: auto;
+    }
+    .presta-studio-ads{
+        display: none;
+    }
+}

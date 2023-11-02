@@ -1,0 +1,7 @@
+admin_link_config:
+    path: omnibus/configuration
+    methods: [GET]
+    defaults:
+      _controller: 'Omnibus\Controller\MenuController::menuAction'
+      _legacy_controller: 'OmnibusController'
+      _legacy_link: 'OmnibusController'

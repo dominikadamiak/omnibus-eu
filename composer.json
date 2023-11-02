@@ -1,0 +1,13 @@
+{
+    "name": "prestastudio/omnibus",
+    "description": "Module for Omnibus Directive by the European Union law.",
+    "autoload": {
+      "psr-4": {
+        "Omnibus\\Controller\\": "src/controller/"
+      }
+    },
+    "config": {
+        "prepend-autoloader": false
+    },
+    "type": "prestashop-module"
+  }
