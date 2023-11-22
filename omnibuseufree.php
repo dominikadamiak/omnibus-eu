@@ -25,7 +25,7 @@ class OmnibusEuFree extends Module
     {
         $this->name = 'omnibuseufree';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'presta.studio';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -117,12 +117,17 @@ class OmnibusEuFree extends Module
 
         $info_version = Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', 2);
 
+        $date = new DateTime();
+        $date->modify('-30 days');
+        $CutOffDate = $date->format('Y-m-d');
+
         $sql = new DbQuery();
         $sql->select('price');
         $sql->from('omnibus_eu_free');
         $sql->where('id_product = ' . (int) $id_product);
         $sql->where('id_product_attribute = ' . (int) $id_product_attribute);
         $sql->where('id_currency = ' . (int) $currency);
+        $sql->where('date_add >= "'.$CutOffDate.' 00:00:00"');
 
         if ($info_version == 2) {
             $sql->where('is_last = 0');
@@ -455,27 +460,29 @@ class OmnibusEuFree extends Module
         $product = new Product($id_product);
         $product_price = $product->getPrice();
 
-        $omnibus_price = array();
-        $omnibus_price = $this->getLastPrice($id_product, 0);
+        if($product_price != 0){
+            $omnibus_price = array();
+            $omnibus_price = $this->getLastPrice($id_product, 0);
 
-        $check_currency = $this->checkCurrencyConversionRate($id_product, 0);
+            $check_currency = $this->checkCurrencyConversionRate($id_product, 0);
 
-        if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
-            $this->clearLastPrice($id_product);
-            $currencies = Currency::getCurrencies();
-            $defaultCurrency = Currency::getDefaultCurrency();
+            if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
+                $this->clearLastPrice($id_product);
+                $currencies = Currency::getCurrencies();
+                $defaultCurrency = Currency::getDefaultCurrency();
 
-            foreach ($currencies as $currency) {
-                if ($currency['id_currency'] == $defaultCurrency->id) {
-                    $isDefaultCurrency = 1;
-                    $product_price_currency = $product_price;
-                } 
-                else {
-                    $isDefaultCurrency = 0;
-                    $product_price_currency = Tools::convertPrice($product_price, $currency);
+                foreach ($currencies as $currency) {
+                    if ($currency['id_currency'] == $defaultCurrency->id) {
+                        $isDefaultCurrency = 1;
+                        $product_price_currency = $product_price;
+                    } 
+                    else {
+                        $isDefaultCurrency = 0;
+                        $product_price_currency = Tools::convertPrice($product_price, $currency);
+                    }
+
+                    $this->insertToOmnibusTable($id_product, 0, $product_price_currency, $currency['id_currency'], $isDefaultCurrency, $currency['conversion_rate']);
                 }
-
-                $this->insertToOmnibusTable($id_product, 0, $product_price_currency, $currency['id_currency'], $isDefaultCurrency, $currency['conversion_rate']);
             }
         }
     }
@@ -496,25 +503,27 @@ class OmnibusEuFree extends Module
             foreach ($product_combinations as $combination) {
                 $product_price = $product->getPrice(true, $combination['id_product_attribute']);
 
-                $omnibus_price = array();
-                $omnibus_price = $this->getLastPrice($id_product, $combination['id_product_attribute']);
+                if($product_price != 0){
+                    $omnibus_price = array();
+                    $omnibus_price = $this->getLastPrice($id_product, $combination['id_product_attribute']);
 
-                $check_currency = $this->checkCurrencyConversionRate($id_product, $combination['id_product_attribute']);
+                    $check_currency = $this->checkCurrencyConversionRate($id_product, $combination['id_product_attribute']);
 
-                if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
-                    $this->clearLastPrice($id_product, $combination['id_product_attribute']);
+                    if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
+                        $this->clearLastPrice($id_product, $combination['id_product_attribute']);
 
-                    foreach ($currencies as $currency) {
-                        if ($currency['id_currency'] == $defaultCurrency->id) {
-                            $isDefaultCurrency = 1;
-                            $product_price_currency = $product_price;
-                        } 
-                        else {
-                            $isDefaultCurrency = 0;
-                            $product_price_currency = Tools::convertPrice($product_price, $currency);
+                        foreach ($currencies as $currency) {
+                            if ($currency['id_currency'] == $defaultCurrency->id) {
+                                $isDefaultCurrency = 1;
+                                $product_price_currency = $product_price;
+                            } 
+                            else {
+                                $isDefaultCurrency = 0;
+                                $product_price_currency = Tools::convertPrice($product_price, $currency);
+                            }
+
+                            $this->insertToOmnibusTable($id_product, $combination['id_product_attribute'], $product_price_currency, $currency['id_currency'], $isDefaultCurrency, $currency['conversion_rate']);
                         }
-
-                        $this->insertToOmnibusTable($id_product, $combination['id_product_attribute'], $product_price_currency, $currency['id_currency'], $isDefaultCurrency, $currency['conversion_rate']);
                     }
                 }
             }
