@@ -17,6 +17,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use Omnibus\Compatibility\PrestashopCompatibility;
+
 class OmnibusEuFree extends Module
 {
     protected $config_form = false;
@@ -146,7 +148,7 @@ class OmnibusEuFree extends Module
         $lastMinimalPrice = $this->getLastMinimalPrice($params['product']['id_product'], $params['product']['id_product_attribute'], $currency->id);
 
         if (!empty($lastMinimalPrice)) {
-            $minimalPrice = Tools::getContextLocale(Context::getContext())->formatPrice($lastMinimalPrice['price'], $currency->iso_code);
+            $minimalPrice = PrestashopCompatibility::formatPrice(_PS_VERSION_, $lastMinimalPrice['price'], $currency);
         } 
         else {
             $minimalPrice = null;
@@ -179,9 +181,9 @@ class OmnibusEuFree extends Module
 
             foreach ($rowValue as $key => $value) {
                 if (isset($OmnibusData[$rowId]['price']) && $key == 'id_currency') {
-                    $currencyIcoCode = Currency::getIsoCodeById($value);
-                    $OmnibusData[$rowId]['price_locale'] = Tools::getContextLocale(Context::getContext())->formatPrice($OmnibusData[$rowId]['price'], $currencyIcoCode);
-                    $OmnibusData[$rowId]['currency_iso_code'] = $currencyIcoCode;
+                    $currency = Currency::getCurrencyInstance((int) $value);
+                    $OmnibusData[$rowId]['price_locale'] = PrestashopCompatibility::formatPrice(_PS_VERSION_, $OmnibusData[$rowId]['price'], $currency);
+                    $OmnibusData[$rowId]['currency_iso_code'] = $currency->iso_code;
                 } 
                 elseif ($key == 'id_product_attribute') {
                     $product = new Product($params['id_product']);

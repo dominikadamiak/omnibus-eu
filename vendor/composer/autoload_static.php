@@ -10,6 +10,7 @@ class ComposerStaticInit26f72ce49b24d770f51f3125f1089bff
         'O' => 
         array (
             'Omnibus\\Controller\\' => 19,
+            'Omnibus\\Compatibility\\' => 22,
         ),
     );
 
@@ -18,10 +19,16 @@ class ComposerStaticInit26f72ce49b24d770f51f3125f1089bff
         array (
             0 => __DIR__ . '/../..' . '/src/controller',
         ),
+        'Omnibus\\Compatibility\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src/compatibility',
+        ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Omnibus\\Compatibility\\PrestashopCompatibility' => __DIR__ . '/../..' . '/src/compatibility/PrestashopCompatibility.php',
+        'Omnibus\\Controller\\MenuController' => __DIR__ . '/../..' . '/src/controller/MenuController.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

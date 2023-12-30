@@ -3,7 +3,8 @@
     "description": "Module for Omnibus Directive by the European Union law.",
     "autoload": {
       "psr-4": {
-        "Omnibus\\Controller\\": "src/controller/"
+        "Omnibus\\Controller\\": "src/controller/",
+        "Omnibus\\Compatibility\\": "src/compatibility/"
       }
     },
     "config": {

@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Omnibus\\Controller\\' => array($baseDir . '/src/controller'),
+    'Omnibus\\Compatibility\\' => array($baseDir . '/src/compatibility'),
 );

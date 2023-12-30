@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Omnibus\\Compatibility\\PrestashopCompatibility' => $baseDir . '/src/compatibility/PrestashopCompatibility.php',
+    'Omnibus\\Controller\\MenuController' => $baseDir . '/src/controller/MenuController.php',
 );
