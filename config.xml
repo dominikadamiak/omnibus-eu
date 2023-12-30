@@ -2,7 +2,7 @@
 <module>
 	<name>omnibuseufree</name>
 	<displayName><![CDATA[Omnibus EU]]></displayName>
-	<version><![CDATA[1.0.1]]></version>
+	<version><![CDATA[1.0.2]]></version>
 	<description><![CDATA[Module for Omnibus Directive by the European Union law.]]></description>
 	<author><![CDATA[presta.studio]]></author>
 	<tab><![CDATA[pricing_promotion]]></tab>

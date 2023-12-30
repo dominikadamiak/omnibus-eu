@@ -27,7 +27,7 @@ class OmnibusEuFree extends Module
     {
         $this->name = 'omnibuseufree';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'presta.studio';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -47,7 +47,7 @@ class OmnibusEuFree extends Module
         Configuration::updateValue('OMNIBUSEUFREE_INFORMATION_VERSION', 2);
         Configuration::updateValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', 1);
         Configuration::updateValue('OMNIBUSEUFREE_CRON_STATUS', 2);
-        Configuration::updateValue('OMNIBUSEUFREE_DAYS', 2);
+        Configuration::updateValue('OMNIBUSEUFREE_DAYS', 30);
 
         include(dirname(__FILE__) . '/sql/install.php');
 

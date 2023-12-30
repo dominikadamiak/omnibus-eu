@@ -25,7 +25,7 @@ class PrestashopCompatibility
 {
     public static function formatPrice($PSversion, $price, $currency)
     {
-        if (version_compare($PSversion, '1.7.6') >= 0) {
+        if (version_compare($PSversion, '1.7.7') >= 0) {
             return Tools::getContextLocale(Context::getContext())->formatPrice($price, $currency->iso_code);
         } 
         else {
