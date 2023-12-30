@@ -87,7 +87,10 @@ class OmnibusEuFree extends Module
         $tab->class_name = 'OmnibusEuFreeController';
         $tab->route_name = 'admin_link_config';
         $tab->icon = 'euro_symbol';
-        $tab->name = $this->l('Omnibus Directive');
+        $tab->name = array();
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = $this->l('Omnibus Directive');
+        }
         $tab->id_parent = (int) Tab::getIdFromClassName('IMPROVE');
         $tab->module = $this->name;
 
