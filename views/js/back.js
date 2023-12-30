@@ -12,8 +12,12 @@
 *  @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License, Version 2.0
 */
 
-$(document).ready(function(){
-    $('#omnibuseu-by-presta-studio-reload').click(function () {
-        location.reload();
-    });
+document.addEventListener("DOMContentLoaded", function() {
+    var OmnibusReloadButton = document.getElementById("omnibuseu-by-presta-studio-reload");
+
+    if (OmnibusReloadButton) {
+        OmnibusReloadButton.onclick = function() {  
+            location.reload();
+        };
+    }
 });
