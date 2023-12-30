@@ -3,5 +3,5 @@ admin_link_config:
     methods: [GET]
     defaults:
       _controller: 'Omnibus\Controller\MenuController::menuAction'
-      _legacy_controller: 'OmnibusController'
-      _legacy_link: 'OmnibusController'
+      _legacy_controller: 'OmnibusEuFreeController'
+      _legacy_link: 'OmnibusEuFreeController'
