@@ -40,5 +40,5 @@ $_MODULE['<{omnibuseufree}prestashop>products-price-list_75edf643d9f66f0f905722d
 $_MODULE['<{omnibuseufree}prestashop>products-price-list_1b13b43983ddd15eb8c8023686e24cbb'] = 'Waluta:';
 $_MODULE['<{omnibuseufree}prestashop>products-price-list_bb3fa120d9acc4dd89421921b049645f'] = 'Ostatnia wartość:';
 $_MODULE['<{omnibuseufree}prestashop>products-price-list_a6054352db7de250c83770a6eac6383d'] = 'Data dodania';
-$_MODULE['<{omnibuseufree}prestashop>presta_studio_omnibus_price_fd8c93ac2518db4006d802382d71d257'] = 'Najniższa cena w ciągu %d dni przed obniżką';
-$_MODULE['<{omnibuseufree}prestashop>presta_studio_omnibus_price_75c403f3838c531bfefa5cec252b011e'] = 'Najniższa cena w ciągu %d dni';
+$_MODULE['<{omnibuseufree}prestashop>presta_studio_omnibus_price_fd8c93ac2518db4006d802382d71d257'] = 'Najniższa cena w ciągu %d dni przed obniżką: ';
+$_MODULE['<{omnibuseufree}prestashop>presta_studio_omnibus_price_75c403f3838c531bfefa5cec252b011e'] = 'Najniższa cena w ciągu %d dni: ';
