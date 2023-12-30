@@ -46,6 +46,8 @@ class OmnibusEuFree extends Module
     {
         Configuration::updateValue('OMNIBUSEUFREE_INFORMATION_VERSION', 2);
         Configuration::updateValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', 1);
+        Configuration::updateValue('OMNIBUSEUFREE_CRON_STATUS', 2);
+        Configuration::updateValue('OMNIBUSEUFREE_DAYS', 2);
 
         include(dirname(__FILE__) . '/sql/install.php');
 
@@ -64,6 +66,8 @@ class OmnibusEuFree extends Module
     {
         Configuration::deleteByName('OMNIBUSEUFREE_INFORMATION_VERSION');
         Configuration::deleteByName('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK');
+        Configuration::deleteByName('OMNIBUSEUFREE_CRON_STATUS');
+        Configuration::deleteByName('OMNIBUSEUFREE_DAYS');
 
         include(dirname(__FILE__) . '/sql/uninstall.php');
 
@@ -83,11 +87,7 @@ class OmnibusEuFree extends Module
         $tab->class_name = 'OmnibusEuFreeController';
         $tab->route_name = 'admin_link_config';
         $tab->icon = 'euro_symbol';
-
-        $tab->name = array();
-        foreach (Language::getLanguages() as $lang) {
-            $tab->name[$lang['id_lang']] = $this->trans('Omnibus Directive', array(), 'Modules.OmnibusByPrestaStudio.Admin', $lang['locale']);
-        }
+        $tab->name = $this->l('Omnibus Directive');
         $tab->id_parent = (int) Tab::getIdFromClassName('IMPROVE');
         $tab->module = $this->name;
 
@@ -117,10 +117,11 @@ class OmnibusEuFree extends Module
             $currency =  $defaultCurrency->id;
         }
 
-        $info_version = Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', 2);
+        $info_version = Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', null, null, null, 2);
+        $NumberOfDays = (int) Configuration::get('OMNIBUSEUFREE_DAYS', null, null, null, 30);
 
         $date = new DateTime();
-        $date->modify('-30 days');
+        $date->modify('-' . $NumberOfDays . ' days');
         $CutOffDate = $date->format('Y-m-d');
 
         $sql = new DbQuery();
@@ -155,10 +156,11 @@ class OmnibusEuFree extends Module
         }
 
         $this->context->smarty->assign([
-            'OmnibuseufreeInfoVersion' => Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', 2),
+            'OmnibuseufreeInfoVersion' => (int) Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', null, null, null, 2),
             'OmnibuseufreeProductPriceMin' => $minimalPrice,
             'OmnibuseufreeProductPriceCurrent' => $params['product']['price'],
-            'OmnibuseufreeProductDiscount' => $params['product']['has_discount'],
+            'OmnibuseufreeProductDiscount' => (bool) $params['product']['has_discount'],
+            'OmnibuseufreeNumberOfDays' => (int) Configuration::get('OMNIBUSEUFREE_DAYS', null, null, null, 30),
         ]);
 
         return $this->display(__FILE__, '/views/templates/hook/presta_studio_omnibus_price.tpl');
@@ -166,7 +168,7 @@ class OmnibusEuFree extends Module
 
     public function hookDisplayProductPriceBlock($params)
     {
-        return ($params['type'] == 'after_price' && Configuration::get('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', 1) == 1) ? $this->hookDisplayOmnibusEuFree($params) : '';
+        return ($params['type'] == 'after_price' && Configuration::get('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK') == 1) ? $this->hookDisplayOmnibusEuFree($params) : '';
     }
 
     public function hookDisplayAdminProductsExtra($params)
@@ -229,7 +231,7 @@ class OmnibusEuFree extends Module
     public function hookActionProductAttributeUpdate()
     {
         if (Module::isEnabled('omnibuseufree')) {
-            $id_product = (int)Tools::getValue('id_product');
+            $id_product = (int) Tools::getValue('id_product');
             Product::flushPriceCache();
 
             $this->addProductPriceWithCombinations($id_product);
@@ -243,13 +245,18 @@ class OmnibusEuFree extends Module
     public function getContent()
     {
         $confirmation = '';
-        if (((bool)Tools::isSubmit('submitOmnibusEuFreeModule')) == true) {
+        if (((bool) Tools::isSubmit('submitOmnibusEuFreeModule')) == true) {
             $confirmation = $this->postProcess();
         }
 
+        $token = Configuration::get('OMNIBUSEUFREE_CRON_TOKEN', null, null, null, 'error');
+
         $this->context->smarty->assign([
             'module_dir' => $this->_path,
-            'lang' => $this->context->language->iso_code
+            'lang' => $this->context->language->iso_code,
+            'update_prices' => Context::getContext()->link->getModuleLink('omnibuseufree', 'cron', array('type' => 1, 'token' => $token)),
+            'delete_outdated_data' => Context::getContext()->link->getModuleLink('omnibuseufree', 'cron', array('type' => 2, 'token' => $token)),
+            'cron_status' => Configuration::get('OMNIBUSEUFREE_CRON_STATUS', null, null, null, 2)
         ]);
 
         $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
@@ -284,6 +291,8 @@ class OmnibusEuFree extends Module
 
     protected function getConfigForm()
     {
+        $NumberOfDays = (int) Configuration::get('OMNIBUSEUFREE_DAYS', null, null, null, 30);
+
         return array(
             'form' => array(
                 'legend' => array(
@@ -331,16 +340,17 @@ class OmnibusEuFree extends Module
                         'type' => 'select',
                         'label' => $this->l('Version:'),
                         'name' => 'OMNIBUSEUFREE_INFORMATION_VERSION',
-                        'required' => true,
+                        'class'    => 'omnibus-select-version',
+                        'required' => true, 
                         'options' => array(
                             'query' => array(
                                 array(
                                     'id_option' => 1,
-                                    'name' => $this->l('Lowest price in 30 days')
+                                    'name' => sprintf($this->l('Lowest price in %d days'),$NumberOfDays)
                                 ),
                                 array(
                                     'id_option' => 2,
-                                    'name' => $this->l('Lowest price in 30 days before discount')
+                                    'name' => sprintf($this->l('Lowest price in %d days before discount'),$NumberOfDays)
                                 ),
                             ),
                             'id' => 'id_option',
@@ -348,11 +358,38 @@ class OmnibusEuFree extends Module
                         )
                     ),
                     array(
+                        'type'     => 'text',                            
+                        'label'    => $this->l('Number of days'),                   
+                        'name'     => 'OMNIBUSEUFREE_DAYS',
+                        'class'    => 'omnibus-input-days',
+                        'maxlength'    => '3',
+                        'required' => true
+                    ),
+                    array(
                         'type' => 'switch',
                         'label' => $this->l('Display on product page'),
                         'name' => 'OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK',
-                        'is_bool' => true,
+                        'is_bool' => false,
                         'desc' => $this->l('Hook: ProductPriceBlock type: after_price'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 2,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('CRON'),
+                        'name' => 'OMNIBUSEUFREE_CRON_STATUS',
+                        'is_bool' => false,
+                        'desc' => $this->l('A new token will be generated if you change the CRON status'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -376,14 +413,20 @@ class OmnibusEuFree extends Module
 
     /**
      * Set values for the inputs.
+     * 
+     * OMNIBUSEUFREE_CRON_STATUS since v1.0.2 
+     * OMNIBUSEUFREE_DAYS since v1.0.2 
+     * 
      */
     protected function getConfigFormValues()
     {
         return array(
             'OMNIBUSEUFREE_OLD_DATA' => false,
             'OMNIBUSEUFREE_UPDATE_DATABASE_PRICE' => false,
-            'OMNIBUSEUFREE_INFORMATION_VERSION' => Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', 2),
-            'OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK' => Configuration::get('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', 1)
+            'OMNIBUSEUFREE_INFORMATION_VERSION' => Configuration::get('OMNIBUSEUFREE_INFORMATION_VERSION', null, null, null, 2),
+            'OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK' => Configuration::get('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', null, null, null, 1),
+            'OMNIBUSEUFREE_CRON_STATUS' => Configuration::get('OMNIBUSEUFREE_CRON_STATUS', null, null, null, 2),
+            'OMNIBUSEUFREE_DAYS' => Configuration::get('OMNIBUSEUFREE_DAYS', null, null, null, 30)
         );
     }
 
@@ -392,8 +435,15 @@ class OmnibusEuFree extends Module
      */
     protected function postProcess()
     {
-        Configuration::updateValue('OMNIBUSEUFREE_INFORMATION_VERSION', Tools::getValue('OMNIBUSEUFREE_INFORMATION_VERSION'));
-        Configuration::updateValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', Tools::getValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK'));
+        if (Configuration::get('OMNIBUSEUFREE_CRON_STATUS', null, null, null, 2) != Tools::getValue('OMNIBUSEUFREE_CRON_STATUS')) {
+            Configuration::updateValue('OMNIBUSEUFREE_CRON_TOKEN', Tools::hash(Tools::passwdGen(16)));
+        }
+        
+        Configuration::updateValue('OMNIBUSEUFREE_INFORMATION_VERSION', (int) Tools::getValue('OMNIBUSEUFREE_INFORMATION_VERSION'));
+        Configuration::updateValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK', (int) Tools::getValue('OMNIBUSEUFREE_DISPLAY_PRODUCT_PRICE_BLOCK'));
+        Configuration::updateValue('OMNIBUSEUFREE_CRON_STATUS', (int) Tools::getValue('OMNIBUSEUFREE_CRON_STATUS'));
+        Configuration::updateValue('OMNIBUSEUFREE_DAYS', (int) Tools::getValue('OMNIBUSEUFREE_DAYS'));
+
         $confirmation = $this->l('The settings have been updated.');
 
         if (Tools::getValue('OMNIBUSEUFREE_OLD_DATA')) {
@@ -404,8 +454,8 @@ class OmnibusEuFree extends Module
 
         if (Tools::getValue('OMNIBUSEUFREE_UPDATE_DATABASE_PRICE')) {
             $InsertDataCounter = $this->insertAllProductsToOmnibusTable();
-            PrestaShopLogger::addLog('Omnibus Directive module by presta.studio - All prices added to database. Number of products checked: ' . $InsertDataCounter);
-            $confirmation .= '<br>' . $this->l('All prices added to database. Number of products checked: ') . $InsertDataCounter;
+            PrestaShopLogger::addLog('Omnibus Directive module by presta.studio - Update prices. Number of products checked: ' . $InsertDataCounter);
+            $confirmation .= '<br>' . $this->l('Update prices. Number of products checked: ') . $InsertDataCounter;
         }
 
         return $this->displayConfirmation($confirmation);
@@ -468,7 +518,7 @@ class OmnibusEuFree extends Module
 
             $check_currency = $this->checkCurrencyConversionRate($id_product, 0);
 
-            if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
+            if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || (bool) $check_currency == true) {
                 $this->clearLastPrice($id_product);
                 $currencies = Currency::getCurrencies();
                 $defaultCurrency = Currency::getDefaultCurrency();
@@ -511,7 +561,7 @@ class OmnibusEuFree extends Module
 
                     $check_currency = $this->checkCurrencyConversionRate($id_product, $combination['id_product_attribute']);
 
-                    if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || $check_currency == true) {
+                    if (empty($omnibus_price) || $product_price != $omnibus_price[0]['price'] || (bool) $check_currency == true) {
                         $this->clearLastPrice($id_product, $combination['id_product_attribute']);
 
                         foreach ($currencies as $currency) {
@@ -584,7 +634,7 @@ class OmnibusEuFree extends Module
         ), 'id_product = ' . (int) $id_product . ' AND id_product_attribute = ' . (int) $id_product_attribute);
     }
 
-    protected function insertAllProductsToOmnibusTable()
+    public function insertAllProductsToOmnibusTable()
     {
         $counter = 0;
         $ProductClass = new Product();
@@ -600,10 +650,12 @@ class OmnibusEuFree extends Module
         return $counter;
     }
 
-    protected function removeOldDataFromOmnibusTable()
+    public function removeOldDataFromOmnibusTable()
     {
+        $NumberOfDays = (int) Configuration::get('OMNIBUSEUFREE_DAYS', null, null, null, 30);
+
         $date = new DateTime();
-        $date->modify('-30 days');
+        $date->modify('-' . $NumberOfDays . ' days');
         $CutOffDate = $date->format('U');
         $counter = 0;
 
@@ -618,7 +670,7 @@ class OmnibusEuFree extends Module
             $DatabaseDate = $date->format('U');
 
             if ($DatabaseDate < $CutOffDate) {
-                Db::getInstance()->delete('omnibus_eu_free', '`id_omnibuseufree` = ' . $row['id_omnibuseufree']);
+                Db::getInstance()->delete('omnibus_eu_free', '`id_omnibuseufree` = ' . (int) $row['id_omnibuseufree']);
                 $counter++;
             }
         }

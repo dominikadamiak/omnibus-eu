@@ -14,7 +14,6 @@
 *}
 
 <div class="panel">
-
 	<div class="panel-heading">
 		<div class="presta-studio-omnibus-header">
 			<div class="presta-studio-omnibus-header-left">
@@ -51,4 +50,28 @@
 			<a href="https://presta.studio/" target="_blank"><img src="{$module_dir}views/img/baner_mobile_en.png" width="300" height="250" class="presta-studio-ads-mobile"></a>
 		{/if}
 	</div>
+</div>
+<div class="panel">
+	<div class="panel-heading">
+		<i class="material-icons md48">sync</i>{l s='CRON' mod='omnibuseufree'}
+	</div>
+	<div class="panel-body form-horizontal">
+		<div class="form-group">
+			<label class="control-label col-lg-4">
+				{l s='Update prices' mod='omnibuseufree'}
+			</label>
+			<div class="col-lg-8">
+				<input type="text" class="form-control disabled" id="omnibus-cron-update-prices" disabled value="{if $cron_status == '1'}{$update_prices}{else}{l s='CRON is disabled.' mod='omnibuseufree'}{/if}"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-lg-4">
+				{l s='Delete outdated data' mod='omnibuseufree'}
+			</label>
+			<div class="col-lg-8">
+				<input type="text" class="form-control disabled" id="omnibus-cron-outdated-data" disabled value="{if $cron_status == '1'}{$delete_outdated_data}{else}{l s='CRON is disabled.' mod='omnibuseufree'}{/if}"/>
+			</div>
+		</div>
+	</div>
+
 </div>

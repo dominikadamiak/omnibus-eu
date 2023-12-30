@@ -50,6 +50,14 @@
     height: auto;
 }
 
+.omnibus-select-version{
+    min-width: 310px !important;
+}
+
+.omnibus-input-days{
+    width: 64px !important;
+}
+
 @media (max-width: 450px) {
     .presta-studio-omnibus-header-right .follow-presta-studio {
         display: none;
