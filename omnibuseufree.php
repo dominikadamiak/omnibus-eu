@@ -454,8 +454,8 @@ class OmnibusEuFree extends Module
 
         if (Tools::getValue('OMNIBUSEUFREE_UPDATE_DATABASE_PRICE')) {
             $InsertDataCounter = $this->insertAllProductsToOmnibusTable();
-            PrestaShopLogger::addLog('Omnibus Directive module by presta.studio - Update prices. Number of products checked: ' . $InsertDataCounter);
-            $confirmation .= '<br>' . $this->l('Update prices. Number of products checked: ') . $InsertDataCounter;
+            PrestaShopLogger::addLog('Omnibus Directive module by presta.studio - Updated price history. Number of products checked: ' . $InsertDataCounter);
+            $confirmation .= '<br>' . $this->l('Updated price history. Number of products checked: ') . $InsertDataCounter;
         }
 
         return $this->displayConfirmation($confirmation);

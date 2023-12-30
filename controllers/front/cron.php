@@ -32,7 +32,7 @@ class OmnibusEuFreeCronModuleFrontController extends ModuleFrontController
                 if ($type == 1) {
                     $Omnibus = new OmnibusEuFree;
                     $InsertDataCounter = $Omnibus->insertAllProductsToOmnibusTable();
-                    PrestaShopLogger::addLog('[CRON] Omnibus Directive module by presta.studio - Update prices. Number of products checked: ' . $InsertDataCounter);
+                    PrestaShopLogger::addLog('[CRON] Omnibus Directive module by presta.studio - Updated price history. Number of products checked: ' . $InsertDataCounter);
                 }
 
                 if ($type == 2) {
